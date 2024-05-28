@@ -1,9 +1,15 @@
-# Northcoders News API
+# How to connect to the local databases used with this repo.
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+This repo requires access to both test and development databases.
 
+You need to enable access the database names through local environment variables.
 
+These environment variables are initialised using two files which must be created in the root folder.
 
---- 
+To access the development database, create a file called .env.development and insert the following line:
+PGDATABASE=database_name
+Where database_name is the name of the development database.
 
-This portfolio project was created as part of a Digital Skills Bootcamp in Software Engineering provided by [Northcoders](https://northcoders.com/)
+To access the test database, create a file called .env.test and insert the following line:
+PGDATABASE=database_name
+Where database_name is the name of the test database.
