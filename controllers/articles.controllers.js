@@ -23,11 +23,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   fetchCommentsByArticleId(article_id)
     .then((comments) => {
-      if (comments.length === 0) {
-        res.status(204).send();
-      } else {
-        res.status(200).send({ comments });
-      }
+      res.status(200).send({ comments });
     })
     .catch(next);
 };

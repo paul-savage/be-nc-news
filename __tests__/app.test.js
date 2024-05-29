@@ -107,8 +107,13 @@ describe("/api/articles/:article_id/comments", () => {
         expect(comments).toBeSortedBy("created_at", { descending: true });
       });
   });
-  test("GET:204 sends an appropriate status message when given a valid but non-existent id", () => {
-    return request(app).get("/api/articles/99999/comments").expect(204);
+  test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
+    return request(app)
+      .get("/api/articles/99999/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
   });
   test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
     return request(app)

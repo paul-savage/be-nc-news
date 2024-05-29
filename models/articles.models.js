@@ -29,6 +29,9 @@ exports.fetchArticles = () => {
         ORDER BY articles.created_at DESC;`
     )
     .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Not Found" });
+      }
       return rows;
     });
 };
@@ -43,6 +46,9 @@ exports.fetchCommentsByArticleId = (article_id) => {
       [article_id]
     )
     .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Not Found" });
+      }
       return rows;
     });
 };
