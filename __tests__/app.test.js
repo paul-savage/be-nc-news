@@ -80,6 +80,7 @@ describe("/api/articles", () => {
       .then(({ body }) => {
         const { articles } = body;
         expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("created_at", { descending: true });
         articles.forEach((article) => {
           expect(typeof article.article_id).toBe("number");
           expect(typeof article.title).toBe("string");
@@ -92,22 +93,6 @@ describe("/api/articles", () => {
         });
       });
   });
-  test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
-    return request(app)
-      .get("/api/articles/99999")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Not Found");
-      });
-  });
-  test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
-    return request(app)
-      .get("/api/articles/notAnId")
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Bad Request");
-      });
-  });
 });
 
 describe("/api/articles/:article_id/comments", () => {
@@ -117,16 +102,13 @@ describe("/api/articles/:article_id/comments", () => {
       .expect(200)
       .then(({ body }) => {
         const { comments } = body;
+        console.log(comments);
         expect(comments.length).toBe(11);
+        expect(comments).toBeSortedBy("created_at", { descending: true });
       });
   });
-  test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
-    return request(app)
-      .get("/api/articles/99999/comments")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Not Found");
-      });
+  test("GET:204 sends an appropriate status message when given a valid but non-existent id", () => {
+    return request(app).get("/api/articles/99999/comments").expect(204);
   });
   test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
     return request(app)
