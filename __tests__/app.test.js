@@ -102,9 +102,17 @@ describe("/api/articles/:article_id/comments", () => {
       .expect(200)
       .then(({ body }) => {
         const { comments } = body;
-        console.log(comments);
         expect(comments.length).toBe(11);
         expect(comments).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("GET:200 sends an empty array for a valid article with no comments to the client", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments.length).toBe(0);
       });
   });
   test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
