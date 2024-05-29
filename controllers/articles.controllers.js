@@ -1,6 +1,8 @@
 const {
   fetchArticleById,
   fetchArticles,
+  fetchCommentsByArticleId,
+  checkExists,
 } = require("../models/articles.models.js");
 
 exports.getArticleById = (req, res, next) => {
@@ -9,13 +11,25 @@ exports.getArticleById = (req, res, next) => {
     .then((article) => {
       res.status(200).send({ article });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 exports.getArticles = (req, res, next) => {
   fetchArticles().then((articles) => {
     res.status(200).send({ articles });
   });
+};
+
+exports.getCommentsByArticleId = (req, res, next) => {
+  const { article_id } = req.params;
+
+  Promise.all([
+    fetchCommentsByArticleId(article_id),
+    checkExists("articles", "article_id", article_id),
+  ])
+    .then((results) => {
+      const comments = results[0];
+      res.status(200).send({ comments });
+    })
+    .catch(next);
 };
