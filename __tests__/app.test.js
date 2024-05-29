@@ -185,4 +185,41 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Not Found");
       });
   });
+  test("PATCH:200 updates the specified article's votes and returns the updated article to the client", () => {
+    const data = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(data)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.votes).toBe(101);
+      });
+  });
+  test("PATCH:404 unsuccessfully updates the specified article's votes when gived a non-existent id", () => {
+    const data = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/articles/99999")
+      .send(data)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
+  test("PATCH:400 unsuccessfully updates the specified article's votes when gived an invalid id", () => {
+    const data = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/articles/notAnId")
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
 });
