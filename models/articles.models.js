@@ -65,6 +65,36 @@ exports.storeCommentsByArticleId = (article_id, data) => {
     });
 };
 
+exports.updateArticleById = (article_id, inc_votes) => {
+  return db
+    .query(
+      `SELECT votes 
+       FROM articles
+       WHERE article_id = $1;`,
+      [article_id]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, msg: "Not Found" });
+      }
+      return rows[0];
+    })
+    .then((article) => {
+      const new_votes = article.votes + inc_votes;
+      return db
+        .query(
+          `UPDATE articles
+           SET votes = $1 
+           WHERE article_id = $2
+           RETURNING *;`,
+          [new_votes, article_id]
+        )
+        .then(({ rows }) => {
+          return rows;
+        });
+    });
+};
+
 exports.checkExists = (table, column, value) => {
   const queryStr = format("SELECT * FROM %I WHERE %I = $1;", table, column);
   return db.query(queryStr, [value]).then(({ rows }) => {
