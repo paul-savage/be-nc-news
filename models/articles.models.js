@@ -51,6 +51,20 @@ exports.fetchCommentsByArticleId = (article_id) => {
     });
 };
 
+exports.storeCommentsByArticleId = (article_id, data) => {
+  return db
+    .query(
+      `INSERT INTO comments
+      (body, article_id, author)
+       VALUES ($1, $2, $3)
+       RETURNING *;`,
+      [data.body, article_id, data.username]
+    )
+    .then(({ rows }) => {
+      return rows;
+    });
+};
+
 exports.checkExists = (table, column, value) => {
   const queryStr = format("SELECT * FROM %I WHERE %I = $1;", table, column);
   return db.query(queryStr, [value]).then(({ rows }) => {

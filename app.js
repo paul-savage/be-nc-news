@@ -12,9 +12,12 @@ const {
   getArticleById,
   getArticles,
   getCommentsByArticleId,
+  postCommentsByArticleId,
 } = require("./controllers/articles.controllers");
 
 const app = express();
+
+app.use(express.json());
 
 app.get("/api", getApis);
 
@@ -23,6 +26,7 @@ app.get("/api/topics", getTopics);
 app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
+app.post("/api/articles/:article_id/comments", postCommentsByArticleId);
 
 app.use(handleCustomErrors);
 app.use(handlePsqlErrors);

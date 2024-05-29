@@ -131,4 +131,58 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Bad Request");
       });
   });
+  test("POST:201 successfully adds a comment for the specified article", () => {
+    const data = {
+      username: "butter_bridge",
+      body: "The comment body",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(data)
+      .expect(201)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment.author).toBe(data.username);
+        expect(comment.body).toBe(data.body);
+      });
+  });
+  test("POST:400 unsuccessfully adds a comment when given an invalid id", () => {
+    const data = {
+      username: "butter_bridge",
+      body: "The comment body",
+    };
+    return request(app)
+      .post("/api/articles/notAnId/comments")
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("POST:404 unsuccessfully adds a comment when given valid but non-existent id", () => {
+    const data = {
+      username: "butter_bridge",
+      body: "The comment body",
+    };
+    return request(app)
+      .post("/api/articles/99999/comments")
+      .send(data)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
+  test("POST:404 unsuccessfully adds a comment when given valid but non-existent username", () => {
+    const data = {
+      username: "paul",
+      body: "The comment body",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(data)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
 });
