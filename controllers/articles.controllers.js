@@ -9,9 +9,11 @@ const {
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
-  fetchArticleById(article_id)
-    .then((article) => {
-      res.status(200).send({ article });
+  return checkExists("articles", "article_id", article_id)
+    .then(() => {
+      return fetchArticleById(article_id).then((article) => {
+        res.status(200).send({ article });
+      });
     })
     .catch(next);
 };

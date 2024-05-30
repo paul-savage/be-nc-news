@@ -54,6 +54,24 @@ describe("/api/articles/:article_id", () => {
         );
       });
   });
+  test("GET:200 sends the specified article with a count of all associated comments to the client", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.comment_count).toBe(11);
+      });
+  });
+  test("GET:200 sends the specified article with a count of all associated comments to the client", () => {
+    return request(app)
+      .get("/api/articles/2")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.comment_count).toBe(0);
+      });
+  });
   test("GET:404 sends an appropriate status and error message when given a valid but non-existent id", () => {
     return request(app)
       .get("/api/articles/99999")
