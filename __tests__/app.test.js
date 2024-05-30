@@ -93,6 +93,27 @@ describe("/api/articles", () => {
         });
       });
   });
+  test("GET:200 sends an array of articles filtered by topic to the client", () => {
+    return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(1);
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+        articles.forEach((article) => {
+          expect(article.topic).toBe("cats");
+        });
+      });
+  });
+  test("GET:404 sends an appropriate status and error message when given a valid but non-existent topic", () => {
+    return request(app)
+      .get("/api/articles?topic=dogs")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
 });
 
 describe("/api/articles/:article_id/comments", () => {
@@ -216,6 +237,18 @@ describe("/api/articles/:article_id/comments", () => {
     };
     return request(app)
       .patch("/api/articles/notAnId")
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("PATCH:400 unsuccessfully updates the specified article's votes when gived an invalid increment", () => {
+    const data = {
+      inc_votes: "not a number",
+    };
+    return request(app)
+      .patch("/api/articles/1")
       .send(data)
       .expect(400)
       .then(({ body }) => {
