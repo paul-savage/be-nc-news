@@ -29,7 +29,21 @@ exports.fetchArticleById = (article_id) => {
     });
 };
 
-exports.fetchArticles = (topic) => {
+exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
+  const validSortBy = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "created_at",
+    "votes",
+  ];
+  const validOrderBy = ["asc", "desc"];
+
+  if (!validSortBy.includes(sort_by) || !validOrderBy.includes(order)) {
+    return Promise.reject({ status: 400, msg: "Bad Request" });
+  }
+
   const values = [];
   sqlQuery = `SELECT
                 articles.author,
@@ -43,12 +57,15 @@ exports.fetchArticles = (topic) => {
                 FROM articles
                 LEFT JOIN comments
                 ON articles.article_id = comments.article_id`;
+
   if (topic) {
     values.push(topic);
-    sqlQuery += ` WHERE articles.topic = $1`;
+    sqlQuery += ` WHERE articles.topic = $${values.length}`;
   }
+
   sqlQuery += ` GROUP BY articles.article_id
-                ORDER BY articles.created_at DESC;`;
+                ORDER BY articles.${sort_by} ${order};`;
+
   if (values.length) {
     return db.query(sqlQuery, values).then(({ rows }) => {
       if (rows.length === 0) {
