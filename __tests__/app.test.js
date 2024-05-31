@@ -132,6 +132,75 @@ describe("/api/articles", () => {
         expect(body.msg).toBe("Not Found");
       });
   });
+  test("GET:200 sends an array of articles sorted by number of votes in descending order to the client", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("votes", { descending: true });
+      });
+  });
+  test("GET:200 sends an array of articles sorted by author in descending order to the client", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("author", { descending: true });
+      });
+  });
+  test("GET:400 sends an appropriate status and error message when given an invalid sort query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=notAValidSortQuery")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("GET:200 sends an array of articles sorted by number of votes in ascending order to the client", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("votes");
+      });
+  });
+  test("GET:400 sends an appropriate status and error message when given an invalid order query", () => {
+    return request(app)
+      .get("/api/articles?order=notAValidOrderQuery")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("GET:200 sends an array of articles sorted by default created_at in ascending order to the client", () => {
+    return request(app)
+      .get("/api/articles?order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("created_at");
+      });
+  });
+  test("GET:200 sends an array of articles filtered by topic, sorted by title in ascending order to the client", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch&sort_by=title&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(12);
+        expect(articles).toBeSortedBy("title");
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
 });
 
 describe("/api/articles/:article_id/comments", () => {
