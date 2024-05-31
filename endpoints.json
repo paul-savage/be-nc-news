@@ -10,8 +10,8 @@
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all articles (filtered by topic, if specified)",
-    "queries": ["topic"],
+    "description": "serves an array of all articles (filtered by topic, if specified), ordered by sort_by in order",
+    "queries": ["topic", "sort_by", "order"],
     "exampleResponse": {
       "articles": [
         {
