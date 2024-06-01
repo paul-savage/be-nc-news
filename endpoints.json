@@ -80,6 +80,11 @@
       }
     }
   },
+  "DELETE /api/articles/:article_id": {
+    "description": "deletes a single article and its associated comments",
+    "queries": [],
+    "exampleResponse": {}
+  },
   "GET /api/articles/:article_id/comments": {
     "description": "serves an array of comments for a specified article, newest first. Pagination using p as page number (1,2,3...) and limit as page size (default 10)",
     "queries": ["p", "limit"],
