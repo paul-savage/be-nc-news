@@ -29,7 +29,13 @@ exports.fetchArticleById = (article_id) => {
     });
 };
 
-exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
+exports.fetchArticles = (
+  topic,
+  p = 1,
+  limit = 10,
+  sort_by = "created_at",
+  order = "desc"
+) => {
   const validSortBy = [
     "article_id",
     "title",
@@ -40,7 +46,18 @@ exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
   ];
   const validOrderBy = ["asc", "desc"];
 
-  if (!validSortBy.includes(sort_by) || !validOrderBy.includes(order)) {
+  p = Number(p);
+  const validP = !isNaN(p) && p > 0 && p === Math.trunc(p);
+
+  limit = Number(limit);
+  const validLimit = !isNaN(limit) && limit > 0 && limit === Math.trunc(limit);
+
+  if (
+    !validP ||
+    !validLimit ||
+    !validSortBy.includes(sort_by) ||
+    !validOrderBy.includes(order)
+  ) {
     return Promise.reject({ status: 400, msg: "Bad Request" });
   }
 
@@ -53,7 +70,8 @@ exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
                 articles.created_at,
                 articles.votes,
                 articles.article_img_url,
-                COUNT(comments.article_id)::INT AS comment_count
+                COUNT(comments.article_id)::INT AS comment_count,
+                COUNT(*) OVER()::INT AS total_count
                 FROM articles
                 LEFT JOIN comments
                 ON articles.article_id = comments.article_id`;
@@ -64,23 +82,22 @@ exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
   }
 
   sqlQuery += ` GROUP BY articles.article_id
-                ORDER BY articles.${sort_by} ${order};`;
+                ORDER BY articles.${sort_by} ${order}`;
 
-  if (values.length) {
-    return db.query(sqlQuery, values).then(({ rows }) => {
-      if (rows.length === 0) {
-        return Promise.reject({ status: 404, msg: "Not Found" });
-      }
-      return rows;
-    });
-  } else {
-    return db.query(sqlQuery).then(({ rows }) => {
-      if (rows.length === 0) {
-        return Promise.reject({ status: 404, msg: "Not Found" });
-      }
-      return rows;
-    });
-  }
+  values.push(limit);
+  sqlQuery += ` LIMIT $${values.length}`;
+
+  values.push((p - 1) * limit);
+  sqlQuery += ` OFFSET $${values.length}`;
+
+  sqlQuery += ";";
+
+  return db.query(sqlQuery, values).then(({ rows }) => {
+    if (rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Not Found" });
+    }
+    return rows;
+  });
 };
 
 exports.fetchCommentsByArticleId = (article_id) => {
