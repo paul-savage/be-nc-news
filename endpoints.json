@@ -9,6 +9,20 @@
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
+  "POST /api/topics": {
+    "description": "adds a topic to the database",
+    "queries": [],
+    "example input": {
+      "slug": "topic name",
+      "description": "topic description"
+    },
+    "exampleResponse": {
+      "topic": {
+        "slug": "topic name",
+        "description": "topic description"
+      }
+    }
+  },
   "GET /api/articles": {
     "description": "serves an array of all articles (filtered by topic, if specified), ordered by sort_by in order. Pagination using p as page number (1,2,3...) and limit as page size (default 10)",
     "queries": ["topic", "sort_by", "order", "p", "limit"],
