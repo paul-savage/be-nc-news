@@ -93,7 +93,7 @@ describe("/api/articles/:article_id", () => {
 describe("/api/articles", () => {
   test("GET:200 sends an array of articles to the client", () => {
     return request(app)
-      .get("/api/articles")
+      .get("/api/articles?limit=100")
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
@@ -108,12 +108,43 @@ describe("/api/articles", () => {
           expect(typeof article.votes).toBe("number");
           expect(typeof article.article_img_url).toBe("string");
           expect(typeof article.comment_count).toBe("number");
+          expect(typeof article.total_count).toBe("number");
+          expect(article.total_count).toBe(13);
         });
+      });
+  });
+  test("GET:200 sends second page, with page size 9, of array of articles to the client", () => {
+    return request(app)
+      .get("/api/articles?p=2&limit=9")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(4);
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+        articles.forEach((article) => {
+          expect(article.total_count).toBe(13);
+        });
+      });
+  });
+  test("GET:400 sends an appropriate status and error message when given an invalid p query", () => {
+    return request(app)
+      .get("/api/articles?p=invalidPage")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("GET:400 sends an appropriate status and error message when given an invalid limit query", () => {
+    return request(app)
+      .get("/api/articles?limit=invalidLimit")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
       });
   });
   test("GET:200 sends an array of articles filtered by topic to the client", () => {
     return request(app)
-      .get("/api/articles?topic=cats")
+      .get("/api/articles?topic=cats&limit=100")
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
@@ -134,7 +165,7 @@ describe("/api/articles", () => {
   });
   test("GET:200 sends an array of articles sorted by number of votes in descending order to the client", () => {
     return request(app)
-      .get("/api/articles?sort_by=votes")
+      .get("/api/articles?sort_by=votes&limit=100")
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
@@ -144,7 +175,7 @@ describe("/api/articles", () => {
   });
   test("GET:200 sends an array of articles sorted by author in descending order to the client", () => {
     return request(app)
-      .get("/api/articles?sort_by=author")
+      .get("/api/articles?sort_by=author&limit=100")
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
@@ -162,7 +193,7 @@ describe("/api/articles", () => {
   });
   test("GET:200 sends an array of articles sorted by number of votes in ascending order to the client", () => {
     return request(app)
-      .get("/api/articles?sort_by=votes&order=asc")
+      .get("/api/articles?sort_by=votes&order=asc&limit=100")
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
@@ -180,7 +211,7 @@ describe("/api/articles", () => {
   });
   test("GET:200 sends an array of articles sorted by default created_at in ascending order to the client", () => {
     return request(app)
-      .get("/api/articles?order=asc")
+      .get("/api/articles?order=asc&limit=100")
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
@@ -190,7 +221,7 @@ describe("/api/articles", () => {
   });
   test("GET:200 sends an array of articles filtered by topic, sorted by title in ascending order to the client", () => {
     return request(app)
-      .get("/api/articles?topic=mitch&sort_by=title&order=asc")
+      .get("/api/articles?topic=mitch&sort_by=title&order=asc&limit=100")
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
