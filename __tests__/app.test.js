@@ -22,6 +22,46 @@ describe("/api/topics", () => {
         });
       });
   });
+  test("POST:201 successfully creates a topic and returns it to the client", () => {
+    const data = {
+      slug: "topic name",
+      description: "topic description",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(data)
+      .expect(201)
+      .then(({ body }) => {
+        const { topic } = body;
+        expect(topic.slug).toBe(data.slug);
+        expect(topic.description).toBe(data.description);
+      });
+  });
+  test("POST:400 fail to create a topic when given invalid data", () => {
+    const data = {
+      description: "topic description",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("POST:400 fail to create a topic when given pre-existing primary key", () => {
+    const data = {
+      slug: "mitch",
+      description: "topic description",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
 });
 
 describe("/api", () => {
