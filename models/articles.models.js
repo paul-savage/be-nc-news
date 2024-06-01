@@ -45,7 +45,7 @@ exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
   }
 
   const values = [];
-  sqlQuery = `SELECT
+  let sqlQuery = `SELECT
                 articles.author,
                 articles.title,
                 articles.article_id,
@@ -139,6 +139,27 @@ exports.updateArticleById = (article_id, inc_votes) => {
           return rows;
         });
     });
+};
+
+exports.storeArticle = (author, title, body, topic, article_img_url) => {
+  const values = [author, title, body, topic];
+
+  let sqlQuery = `INSERT INTO articles
+                  (author, title, body, topic)
+                  VALUES ($1, $2, $3, $4)
+                  RETURNING *;`;
+
+  if (article_img_url) {
+    values.push(article_img_url);
+    sqlQuery = `INSERT INTO articles
+                (author, title, body, topic, article_img_url)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING *;`;
+  }
+  return db.query(sqlQuery, values).then(({ rows }) => {
+    const article_id = rows[0].article_id;
+    return this.fetchArticleById(article_id);
+  });
 };
 
 exports.checkExists = (table, column, value) => {

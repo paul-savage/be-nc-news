@@ -4,12 +4,13 @@ const {
   fetchCommentsByArticleId,
   storeCommentsByArticleId,
   updateArticleById,
+  storeArticle,
   checkExists,
 } = require("../models/articles.models.js");
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
-  return checkExists("articles", "article_id", article_id)
+  checkExists("articles", "article_id", article_id)
     .then(() => {
       return fetchArticleById(article_id).then((article) => {
         res.status(200).send({ article });
@@ -69,6 +70,23 @@ exports.patchArticleById = (req, res, next) => {
     .then((rows) => {
       const article = rows[0];
       res.status(200).send({ article });
+    })
+    .catch(next);
+};
+
+exports.postArticle = (req, res, next) => {
+  const data = req.body;
+  const { author, title, body, topic, article_img_url } = data;
+
+  Promise.all([
+    checkExists("users", "username", author),
+    checkExists("topics", "slug", topic),
+  ])
+    .then(() => {
+      return storeArticle(author, title, body, topic, article_img_url);
+    })
+    .then((article) => {
+      res.status(201).send({ article });
     })
     .catch(next);
 };

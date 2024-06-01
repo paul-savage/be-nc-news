@@ -201,6 +201,100 @@ describe("/api/articles", () => {
         });
       });
   });
+  test("POST:201 successfully creates an article (without image url) and returns it to the client", () => {
+    const data = {
+      author: "butter_bridge",
+      title: "The title",
+      body: "The article body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(data)
+      .expect(201)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.author).toBe(data.author);
+        expect(article.title).toBe(data.title);
+        expect(article.body).toBe(data.body);
+        expect(article.article_id).toBe(14);
+        expect(article.votes).toBe(0);
+        expect(article.article_img_url).toBe(
+          "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+        );
+        expect(article.comment_count).toBe(0);
+      });
+  });
+  test("POST:201 successfully creates an article (with image url) and returns it to the client", () => {
+    const data = {
+      author: "butter_bridge",
+      title: "The title",
+      body: "The article body",
+      topic: "mitch",
+      article_img_url:
+        "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(data)
+      .expect(201)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.author).toBe(data.author);
+        expect(article.title).toBe(data.title);
+        expect(article.body).toBe(data.body);
+        expect(article.article_id).toBe(14);
+        expect(article.votes).toBe(0);
+        expect(article.article_img_url).toBe(
+          "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+        );
+        expect(article.comment_count).toBe(0);
+      });
+  });
+  test("POST:404 fails to add an article when given an non-existent author/username", () => {
+    const data = {
+      author: "paul",
+      title: "The title",
+      body: "The article body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(data)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
+  test("POST:404 fails to add an article when given an non-existent topic", () => {
+    const data = {
+      author: "butter_bridge",
+      title: "The title",
+      body: "The article body",
+      topic: "lacrosse",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(data)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
+  test("POST:400 fails to add an article when given insufficient parameters", () => {
+    const data = {
+      author: "butter_bridge",
+      body: "The article body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
 });
 
 describe("/api/articles/:article_id/comments", () => {
@@ -254,7 +348,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(comment.body).toBe(data.body);
       });
   });
-  test("POST:400 unsuccessfully adds a comment when given an invalid id", () => {
+  test("POST:400 fails to add a comment when given an invalid id", () => {
     const data = {
       username: "butter_bridge",
       body: "The comment body",
@@ -267,7 +361,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Bad Request");
       });
   });
-  test("POST:404 unsuccessfully adds a comment when given valid but non-existent id", () => {
+  test("POST:404 fails to add a comment when given valid but non-existent id", () => {
     const data = {
       username: "butter_bridge",
       body: "The comment body",
@@ -280,7 +374,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Not Found");
       });
   });
-  test("POST:404 unsuccessfully adds a comment when given valid but non-existent username", () => {
+  test("POST:404 fails to add a comment when given valid but non-existent username", () => {
     const data = {
       username: "paul",
       body: "The comment body",
@@ -306,7 +400,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(article.votes).toBe(101);
       });
   });
-  test("PATCH:404 unsuccessfully updates the specified article's votes when gived a non-existent id", () => {
+  test("PATCH:404 fails to update the specified article's votes when gived a non-existent id", () => {
     const data = {
       inc_votes: 1,
     };
@@ -318,7 +412,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Not Found");
       });
   });
-  test("PATCH:400 unsuccessfully updates the specified article's votes when gived an invalid id", () => {
+  test("PATCH:400 fails to update the specified article's votes when gived an invalid id", () => {
     const data = {
       inc_votes: 1,
     };
@@ -330,7 +424,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Bad Request");
       });
   });
-  test("PATCH:400 unsuccessfully updates the specified article's votes when gived an invalid increment", () => {
+  test("PATCH:400 fails to update the specified article's votes when gived an invalid increment", () => {
     const data = {
       inc_votes: "not a number",
     };
@@ -348,7 +442,7 @@ describe("/api/comments/:comment_id", () => {
   test("DELETE:204 deletes the specified comment given a valid id", () => {
     return request(app).delete("/api/comments/1").expect(204);
   });
-  test("DELETE:404 unsuccessfully deletes the specified comment given a non-existent valid id", () => {
+  test("DELETE:404 fails to delete the specified comment given a non-existent valid id", () => {
     return request(app)
       .delete("/api/comments/99999")
       .expect(404)
@@ -356,7 +450,7 @@ describe("/api/comments/:comment_id", () => {
         expect(body.msg).toBe("Not Found");
       });
   });
-  test("DELETE:400 unsuccessfully deletes the specified comment given an invalid id", () => {
+  test("DELETE:400 fails to delete the specified comment given an invalid id", () => {
     return request(app)
       .delete("/api/comments/notAComment")
       .expect(400)
@@ -383,7 +477,7 @@ describe("/api/comments/:comment_id", () => {
         expect(comment.created_at).toBe("2020-02-23T12:01:00.000Z");
       });
   });
-  test("PATCH:404 unsuccessfully updates the specified comments's votes when gived a non-existent id", () => {
+  test("PATCH:404 fails to update the specified comments's votes when gived a non-existent id", () => {
     const data = {
       inc_votes: 1,
     };
@@ -395,7 +489,7 @@ describe("/api/comments/:comment_id", () => {
         expect(body.msg).toBe("Not Found");
       });
   });
-  test("PATCH:400 unsuccessfully updates the specified comments's votes when gived an invalid id", () => {
+  test("PATCH:400 fails to update the specified comments's votes when gived an invalid id", () => {
     const data = {
       inc_votes: 1,
     };
@@ -407,7 +501,7 @@ describe("/api/comments/:comment_id", () => {
         expect(body.msg).toBe("Bad Request");
       });
   });
-  test("PATCH:400 unsuccessfully updates the specified comment's votes when gived an invalid increment", () => {
+  test("PATCH:400 fails to update the specified comment's votes when gived an invalid increment", () => {
     const data = {
       inc_votes: "not a number",
     };
