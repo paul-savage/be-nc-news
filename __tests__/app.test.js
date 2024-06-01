@@ -331,11 +331,21 @@ describe("/api/articles", () => {
 describe("/api/articles/:article_id/comments", () => {
   test("GET:200 sends the comments associated with specified article to the client", () => {
     return request(app)
-      .get("/api/articles/1/comments")
+      .get("/api/articles/1/comments?limit=100")
       .expect(200)
       .then(({ body }) => {
         const { comments } = body;
         expect(comments.length).toBe(11);
+        expect(comments).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("GET:200 sends the second page of comments associated with specified article to the client", () => {
+    return request(app)
+      .get("/api/articles/1/comments?p=2&limit=6")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments.length).toBe(5);
         expect(comments).toBeSortedBy("created_at", { descending: true });
       });
   });
@@ -359,6 +369,22 @@ describe("/api/articles/:article_id/comments", () => {
   test("GET:400 sends an appropriate status and error message when given an invalid id", () => {
     return request(app)
       .get("/api/articles/notAnId/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("GET:400 sends an appropriate status and error message when given an invalid p query", () => {
+    return request(app)
+      .get("/api/articles/1/comments?p=invalidPQuery")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("GET:400 sends an appropriate status and error message when given an invalid limit query", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=invalidLimitQuery")
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad Request");
