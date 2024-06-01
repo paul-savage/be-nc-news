@@ -100,14 +100,25 @@ exports.fetchArticles = (
   });
 };
 
-exports.fetchCommentsByArticleId = (article_id) => {
+exports.fetchCommentsByArticleId = (article_id, p = 1, limit = 10) => {
+  p = Number(p);
+  const validP = !isNaN(p) && p > 0 && p === Math.trunc(p);
+
+  limit = Number(limit);
+  const validLimit = !isNaN(limit) && limit > 0 && limit === Math.trunc(limit);
+
+  if (!validP || !validLimit) {
+    return Promise.reject({ status: 400, msg: "Bad Request" });
+  }
+
   return db
     .query(
       `SELECT * 
        FROM comments
        WHERE article_id = $1
-       ORDER BY created_at DESC;`,
-      [article_id]
+       ORDER BY created_at DESC
+       LIMIT $2 OFFSET $3;`,
+      [article_id, limit, (p - 1) * limit]
     )
     .then(({ rows }) => {
       return rows;
