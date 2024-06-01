@@ -6,9 +6,11 @@ const {
   getCommentsByArticleId,
   postCommentsByArticleId,
   patchArticleById,
+  postArticle,
 } = require("../controllers/articles.controllers");
 
 articleRouter.get("/", getArticles);
+articleRouter.post("/", postArticle);
 
 articleRouter.route("/:article_id").get(getArticleById).patch(patchArticleById);
 
