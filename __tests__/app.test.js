@@ -364,6 +364,61 @@ describe("/api/comments/:comment_id", () => {
         expect(body.msg).toBe("Bad Request");
       });
   });
+  test("PATCH:200 updates the specified comment's votes and returns the updated comment to the client", () => {
+    const data = {
+      inc_votes: 11,
+    };
+    return request(app)
+      .patch("/api/comments/4")
+      .send(data)
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment.body).toBe(
+          " I carry a log — yes. Is it funny to you? It is not to me."
+        );
+        expect(comment.votes).toBe(-89);
+        expect(comment.author).toBe("icellusedkars");
+        expect(comment.article_id).toBe(1);
+        expect(comment.created_at).toBe("2020-02-23T12:01:00.000Z");
+      });
+  });
+  test("PATCH:404 unsuccessfully updates the specified comments's votes when gived a non-existent id", () => {
+    const data = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/comments/99999")
+      .send(data)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
+  test("PATCH:400 unsuccessfully updates the specified comments's votes when gived an invalid id", () => {
+    const data = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/comments/notAnId")
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  test("PATCH:400 unsuccessfully updates the specified comment's votes when gived an invalid increment", () => {
+    const data = {
+      inc_votes: "not a number",
+    };
+    return request(app)
+      .patch("/api/comments/1")
+      .send(data)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
 });
 
 describe("/api/users", () => {
