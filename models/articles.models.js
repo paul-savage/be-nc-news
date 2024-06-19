@@ -82,8 +82,13 @@ exports.fetchArticles = (
     sqlQuery += ` WHERE articles.topic = $${values.length}`;
   }
 
-  sqlQuery += ` GROUP BY articles.article_id
-                ORDER BY articles.${sort_by} ${order}`;
+  if (sort_by === "comment_count") {
+    sqlQuery += ` GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order}`;
+  } else {
+    sqlQuery += ` GROUP BY articles.article_id
+    ORDER BY articles.${sort_by} ${order}`;
+  }
 
   values.push(limit);
   sqlQuery += ` LIMIT $${values.length}`;
@@ -92,6 +97,7 @@ exports.fetchArticles = (
   sqlQuery += ` OFFSET $${values.length}`;
 
   sqlQuery += ";";
+  console.log(sqlQuery);
 
   return db.query(sqlQuery, values).then(({ rows }) => {
     if (rows.length === 0) {

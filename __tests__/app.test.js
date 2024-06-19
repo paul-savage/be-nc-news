@@ -232,6 +232,16 @@ describe("/api/articles", () => {
         expect(articles).toBeSortedBy("votes", { descending: true });
       });
   });
+  test("GET:200 sends an array of articles sorted by number of comments in descending order to the client", () => {
+    return request(app)
+      .get("/api/articles?sort_by=comment_count&limit=100")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("comment_count", { descending: true });
+      });
+  });
   test("GET:200 sends an array of articles sorted by author in descending order to the client", () => {
     return request(app)
       .get("/api/articles?sort_by=author&limit=100")
