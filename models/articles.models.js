@@ -43,6 +43,7 @@ exports.fetchArticles = (
     "author",
     "created_at",
     "votes",
+    "comment_count",
   ];
   const validOrderBy = ["asc", "desc"];
 
